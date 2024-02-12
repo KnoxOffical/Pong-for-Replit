@@ -1,0 +1,79 @@
+import pygame
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Set up the screen
+WIDTH, HEIGHT = 600, 500
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Pong")
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+
+# Game variables
+paddle_width = 10
+paddle_height = 100
+ball_radius = 10
+paddle_speed = 5
+ball_speed = [5, 5]
+
+# Create paddle
+player_rect = pygame.Rect(WIDTH - paddle_width - 50, HEIGHT // 2 - paddle_height // 2, paddle_width, paddle_height)
+
+# Create ball
+ball_pos = [WIDTH // 2, HEIGHT // 2]
+
+# Score
+score = 0
+
+# Main game loop
+running = True
+clock = pygame.time.Clock()
+while running:
+    screen.fill(BLACK)
+
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Move paddle
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w] and player_rect.top > 0:  # Adjusted conditions for paddle movement
+        player_rect.move_ip(0, -paddle_speed)
+    if keys[pygame.K_s] and player_rect.bottom < HEIGHT:
+        player_rect.move_ip(0, paddle_speed)
+
+    # Move ball
+    ball_pos[0] += ball_speed[0]
+    ball_pos[1] += ball_speed[1]
+
+    # Check for collisions with walls
+    if ball_pos[1] - ball_radius <= 0 or ball_pos[1] + ball_radius >= HEIGHT:  # Adjusted conditions for ball-wall collisions
+        ball_speed[1] *= -1
+    if ball_pos[0] - ball_radius <= 0 or ball_pos[0] + ball_radius >= WIDTH:
+        ball_speed[0] *= -1
+        score += 1
+
+    # Check for collisions with paddle
+    if player_rect.collidepoint(ball_pos):
+        ball_speed[0] *= -1
+
+    # Draw paddle, ball, and score
+    pygame.draw.rect(screen, WHITE, player_rect)
+    pygame.draw.circle(screen, WHITE, ball_pos, ball_radius)
+    font = pygame.font.Font(None, 36)
+    score_text = font.render(f"Score: {score}", True, WHITE)
+    screen.blit(score_text, (10, 10))
+
+    # Update display
+    pygame.display.flip()
+
+    # Cap the frame rate
+    clock.tick(60)
+
+# Quit Pygame
+pygame.quit()
